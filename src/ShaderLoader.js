@@ -713,8 +713,21 @@ export class ShaderLoader {
     }
 
     onShaderChange(code) {
-        const event = new CustomEvent('shaderChange', { detail: { code } });
-        document.dispatchEvent(event);
+        // Si es una actualización desde el editor
+        if (typeof code === 'string') {
+            const event = new CustomEvent('shaderChange', { detail: { code } });
+            document.dispatchEvent(event);
+            return;
+        }
+
+        // Si es una actualización desde el evento de cambio
+        if (code.docChanged) {
+            const newCode = code.state.doc.toString();
+            this.hasChanges = true;
+            this.updateSaveButtonVisibility();
+            const event = new CustomEvent('shaderChange', { detail: { code: newCode } });
+            document.dispatchEvent(event);
+        }
     }
 
     async saveShader() {

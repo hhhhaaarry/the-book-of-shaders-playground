@@ -67,6 +67,7 @@ select {
   padding-top: 8px;
   min-width: 0;
   overflow: hidden;
+  position: relative;
 }
 .shader-wrapper {
   display: flex;
@@ -330,4 +331,81 @@ select {
 .loading {
   pointer-events: none;
   opacity: 0.7;
+}
+
+.shader-error-drawer {
+    position: absolute;
+    bottom: -300px;
+    left: 0;
+    right: 0;
+    background-color: #2c1212;
+    color: #ff9999;
+    border-top: 2px solid #ff6666;
+    max-height: 300px;
+    transition: transform 0.3s ease-in-out;
+    z-index: 1000;
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.3);
+    pointer-events: auto;
+}
+
+.shader-error-drawer.visible {
+    transform: translateY(-300px);
+  
+}
+
+.shader-error-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 16px;
+    background-color: #3c1818;
+    border-bottom: 1px solid #ff6666;
+}
+
+.error-title {
+    font-weight: bold;
+    font-size: 0.9rem;
+}
+
+.error-close {
+    background: none;
+    border: none;
+    color: #ff9999;
+    font-size: 1.5rem;
+    cursor: pointer;
+    padding: 0 4px;
+    line-height: 1;
+    transition: color 0.2s ease;
+}
+
+.error-close:hover {
+    color: #ffcccc;
+}
+
+.shader-error-content {
+    font-family: monospace;
+    padding: 12px 16px;
+    margin: 0;
+    font-size: 0.875rem;
+    white-space: pre-wrap;
+    overflow-y: auto;
+    max-height: 255px;
+}
+
+/* Estilizar el scrollbar */
+.shader-error-content::-webkit-scrollbar {
+    width: 8px;
+}
+
+.shader-error-content::-webkit-scrollbar-track {
+    background: #3c1818;
+}
+
+.shader-error-content::-webkit-scrollbar-thumb {
+    background-color: #ff6666;
+    border-radius: 4px;
+}
+
+.shader-error-content::-webkit-scrollbar-thumb:hover {
+    background-color: #ff8080;
 }
