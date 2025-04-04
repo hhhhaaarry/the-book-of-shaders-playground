@@ -13,7 +13,7 @@ const PORT = 5173; // Usar el mismo puerto que Vite
 // Cache para la estructura de shaders
 let shadersCache = null;
 let lastCacheUpdate = 0;
-const CACHE_TTL = 5000; // 5 segundos de tiempo de vida para la caché
+const CACHE_TTL = 300000; // 5 minutos de tiempo de vida para la caché
 
 // Middleware para parsear JSON
 app.use(express.json());
@@ -38,40 +38,59 @@ async function getShaderStructure() {
     const chapters = await fs.readdir(shadersDir);
     const structure = {};
     
-    await Promise.all(chapters.map(async (chapter) => {
+    // Leer todos los directorios en paralelo
+    const chapterPromises = chapters.map(async (chapter) => {
         const chapterPath = path.join(shadersDir, chapter);
-        
         try {
             const chapterStats = await fs.stat(chapterPath);
+            if (!chapterStats.isDirectory()) return null;
             
-            if (chapterStats.isDirectory()) {
-                const exercises = await fs.readdir(chapterPath);
-                const exerciseMap = {};
+            const exercises = await fs.readdir(chapterPath);
+            const exercisePromises = exercises.map(async (exercise) => {
+                const exercisePath = path.join(chapterPath, exercise);
+                const fragmentPath = path.join(exercisePath, 'fragment.glsl');
                 
-                await Promise.all(exercises.map(async (exercise) => {
-                    const exercisePath = path.join(chapterPath, exercise);
-                    const fragmentPath = path.join(exercisePath, 'fragment.glsl');
+                try {
+                    const exerciseStats = await fs.stat(exercisePath);
+                    if (!exerciseStats.isDirectory()) return null;
                     
-                    try {
-                        const exerciseStats = await fs.stat(exercisePath);
-                        if (exerciseStats.isDirectory()) {
-                            try {
-                                await fs.access(fragmentPath);
-                                exerciseMap[exercise] = { name: exercise };
-                            } catch (err) {}
-                        }
-                    } catch (err) {}
-                }));
-                
-                if (Object.keys(exerciseMap).length > 0) {
-                    structure[chapter] = {
+                    await fs.access(fragmentPath);
+                    return { name: exercise };
+                } catch (err) {
+                    return null;
+                }
+            });
+            
+            const exerciseResults = await Promise.all(exercisePromises);
+            const exerciseMap = {};
+            
+            exerciseResults.forEach((result, index) => {
+                if (result) {
+                    exerciseMap[exercises[index]] = result;
+                }
+            });
+            
+            if (Object.keys(exerciseMap).length > 0) {
+                return {
+                    chapter,
+                    data: {
                         name: chapter,
                         exercises: exerciseMap
-                    };
-                }
+                    }
+                };
             }
-        } catch (err) {}
-    }));
+        } catch (err) {
+            return null;
+        }
+        return null;
+    });
+    
+    const results = await Promise.all(chapterPromises);
+    results.forEach(result => {
+        if (result) {
+            structure[result.chapter] = result.data;
+        }
+    });
     
     return structure;
 }

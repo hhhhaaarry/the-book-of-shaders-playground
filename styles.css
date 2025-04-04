@@ -54,7 +54,7 @@ select {
     background: #272822;
     border-radius: 4px;
     overflow: hidden;
-    margin-bottom: 24px;
+    margin-bottom: 16px;
 }
 
 .main-content {
@@ -89,7 +89,6 @@ select {
     margin-top: 16px;
     border-top: 1px solid #555;
     padding-top: 16px;
-    margin-bottom: 16px;
 }
 
 .uniforms h3 {

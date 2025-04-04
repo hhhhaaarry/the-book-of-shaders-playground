@@ -6,6 +6,57 @@ import { fileURLToPath } from 'url';
 // Obtener la ruta del directorio raíz del proyecto
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
+// Función auxiliar para leer la estructura de directorios
+async function readShaderStructure(dir) {
+  const structure = {};
+  
+  try {
+    const entries = await fs.readdir(dir, { withFileTypes: true });
+    
+    for (const entry of entries) {
+      // Ignorar archivos y directorios que empiezan con punto
+      if (entry.name.startsWith('.')) continue;
+      
+      if (entry.isDirectory()) {
+        const chapterPath = path.join(dir, entry.name);
+        const exercises = {};
+        
+        // Leer los ejercicios dentro del capítulo
+        const exerciseEntries = await fs.readdir(chapterPath, { withFileTypes: true });
+        
+        for (const exerciseEntry of exerciseEntries) {
+          if (exerciseEntry.isDirectory()) {
+            const fragmentPath = path.join(chapterPath, exerciseEntry.name, 'fragment.glsl');
+            try {
+              // Verificar si existe el archivo fragment.glsl
+              await fs.access(fragmentPath);
+              exercises[exerciseEntry.name] = {
+                name: exerciseEntry.name
+              };
+            } catch (error) {
+              // Si no existe fragment.glsl, ignorar este ejercicio
+              continue;
+            }
+          }
+        }
+        
+        // Solo añadir el capítulo si tiene ejercicios
+        if (Object.keys(exercises).length > 0) {
+          structure[entry.name] = {
+            name: entry.name,
+            exercises
+          };
+        }
+      }
+    }
+    
+    return structure;
+  } catch (error) {
+    console.error('Error reading shader structure:', error);
+    throw error;
+  }
+}
+
 export default defineConfig({
   server: {
     open: true,
@@ -17,10 +68,34 @@ export default defineConfig({
     }
   },
   plugins: [{
-    name: 'shader-save',
+    name: 'shader-server',
     configureServer(server) {
       server.middlewares.use(async (req, res, next) => {
-        if (req.url === '/api/save-shader' && req.method === 'POST') {
+        if (req.url === '/api/list-shaders') {
+          try {
+            // Construir la ruta al directorio de shaders
+            const shadersDir = path.join(__dirname, 'src', 'shaders');
+            console.log('Reading shaders from:', shadersDir);
+            
+            // Leer la estructura de directorios
+            const structure = await readShaderStructure(shadersDir);
+            console.log('Shader structure:', JSON.stringify(structure, null, 2));
+            
+            // Enviar la respuesta
+            res.setHeader('Content-Type', 'application/json');
+            res.end(JSON.stringify({
+              success: true,
+              structure
+            }));
+          } catch (error) {
+            console.error('Error listing shaders:', error);
+            res.setHeader('Content-Type', 'application/json');
+            res.end(JSON.stringify({
+              success: false,
+              error: error.message
+            }));
+          }
+        } else if (req.url === '/api/save-shader' && req.method === 'POST') {
           let data = '';
           
           // Recoger los datos de la petición
