@@ -8,7 +8,13 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 export default defineConfig({
   server: {
-    open: true
+    open: true,
+    proxy: {
+      '/api': {
+        target: 'http://localhost:5173',
+        changeOrigin: true
+      }
+    }
   },
   plugins: [{
     name: 'shader-save',

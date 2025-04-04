@@ -46,30 +46,138 @@ export class ShaderLoader {
 
         this.loadDefaultShader();
         this.initEditor();
+
+        // Configurar el modal de guardar nuevo shader
+        console.log('Configurando modal de guardar nuevo shader...');
+        const saveNewButton = document.getElementById('save-new-shader-btn');
+        const modal = document.getElementById('save-modal');
+        const saveModalBtn = document.getElementById('save-modal-btn');
+        const cancelModalBtn = document.getElementById('cancel-modal-btn');
+        const chapterInput = document.getElementById('chapter-input');
+        const exerciseInput = document.getElementById('exercise-input');
+        const newChapterInput = document.getElementById('new-chapter-input');
+        const newExerciseInput = document.getElementById('new-exercise-input');
+
+        console.log('Elementos del modal:', {
+            saveNewButton: saveNewButton ? 'encontrado' : 'no encontrado',
+            modal: modal ? 'encontrado' : 'no encontrado',
+            saveModalBtn: saveModalBtn ? 'encontrado' : 'no encontrado',
+            cancelModalBtn: cancelModalBtn ? 'encontrado' : 'no encontrado',
+            chapterInput: chapterInput ? 'encontrado' : 'no encontrado',
+            exerciseInput: exerciseInput ? 'encontrado' : 'no encontrado',
+            newChapterInput: newChapterInput ? 'encontrado' : 'no encontrado',
+            newExerciseInput: newExerciseInput ? 'encontrado' : 'no encontrado'
+        });
+
+        if (saveNewButton) {
+            console.log('Botón de guardar nuevo shader encontrado, añadiendo evento click');
+            saveNewButton.onclick = () => {
+                console.log('Click en botón guardar nuevo shader detectado');
+                this.showSaveModal();
+            };
+        } else {
+            console.error('No se encontró el botón de guardar nuevo shader');
+        }
+
+        if (cancelModalBtn) {
+            cancelModalBtn.onclick = () => this.hideModal();
+        }
+
+        if (saveModalBtn) {
+            saveModalBtn.onclick = () => this.saveNewShader();
+        }
+
+        if (chapterInput) {
+            chapterInput.onchange = (e) => {
+                newChapterInput.classList.toggle('hidden', e.target.value !== 'new');
+                this.updateExerciseInputOptions(e.target.value);
+            };
+        }
+
+        if (exerciseInput) {
+            exerciseInput.onchange = (e) => {
+                newExerciseInput.classList.toggle('hidden', e.target.value !== 'new');
+            };
+        }
+
+        // Guardar referencias
+        this.modal = modal;
+        this.chapterInput = chapterInput;
+        this.exerciseInput = exerciseInput;
+        this.newChapterInput = newChapterInput;
+        this.newExerciseInput = newExerciseInput;
     }
 
     async initialize() {
         console.log('Inicializando ShaderLoader...');
+        
+        // Cargar la estructura de shaders primero
         await this.loadShaderStructure();
+        
+        // Luego configurar la UI
         this.setupUI();
         
-        // Cargar estado desde URL si existe
-        const params = new URLSearchParams(window.location.search);
-        const chapter = params.get('chapter');
-        const exercise = params.get('exercise');
-        
-        if (chapter && exercise) {
-            this.currentChapter = chapter;
-            this.updateExerciseSelect();
-            this.currentExercise = exercise;
-            
-            // Actualizar los selectores
-            const chapterSelect = document.getElementById('chapter-select');
-            const exerciseSelect = document.getElementById('exercise-select');
-            if (chapterSelect) chapterSelect.value = chapter;
-            if (exerciseSelect) exerciseSelect.value = exercise;
-            
-            await this.loadShader();
+        // Reinicializar los elementos del modal
+        console.log('Reinicializando elementos del modal...');
+        this.modal = document.getElementById('save-modal');
+        this.chapterInput = document.getElementById('chapter-input');
+        this.exerciseInput = document.getElementById('exercise-input');
+        this.newChapterInput = document.getElementById('new-chapter-input');
+        this.newExerciseInput = document.getElementById('new-exercise-input');
+        const saveNewButton = document.getElementById('save-new-shader-btn');
+        const saveModalBtn = document.getElementById('save-modal-btn');
+        const cancelModalBtn = document.getElementById('cancel-modal-btn');
+
+        console.log('Elementos del modal reinicializados:', {
+            modal: this.modal ? 'encontrado' : 'no encontrado',
+            chapterInput: this.chapterInput ? 'encontrado' : 'no encontrado',
+            exerciseInput: this.exerciseInput ? 'encontrado' : 'no encontrado',
+            newChapterInput: this.newChapterInput ? 'encontrado' : 'no encontrado',
+            newExerciseInput: this.newExerciseInput ? 'encontrado' : 'no encontrado',
+            saveNewButton: saveNewButton ? 'encontrado' : 'no encontrado',
+            saveModalBtn: saveModalBtn ? 'encontrado' : 'no encontrado',
+            cancelModalBtn: cancelModalBtn ? 'encontrado' : 'no encontrado'
+        });
+
+        if (saveNewButton) {
+            console.log('Reconfigurando botón de guardar nuevo shader');
+            saveNewButton.onclick = () => {
+                console.log('Click en botón guardar nuevo shader detectado');
+                this.showSaveModal();
+            };
+        }
+
+        if (cancelModalBtn) {
+            console.log('Reconfigurando botón de cancelar modal');
+            cancelModalBtn.onclick = () => {
+                console.log('Click en botón cancelar modal detectado');
+                this.hideModal();
+            };
+        }
+
+        if (saveModalBtn) {
+            console.log('Reconfigurando botón de guardar modal');
+            saveModalBtn.onclick = () => {
+                console.log('Click en botón guardar modal detectado');
+                this.saveNewShader();
+            };
+        }
+
+        if (this.chapterInput) {
+            console.log('Reconfigurando input de capítulo');
+            this.chapterInput.onchange = (e) => {
+                console.log('Cambio en input de capítulo detectado:', e.target.value);
+                this.newChapterInput.classList.toggle('hidden', e.target.value !== 'new');
+                this.updateExerciseInputOptions(e.target.value);
+            };
+        }
+
+        if (this.exerciseInput) {
+            console.log('Reconfigurando input de ejercicio');
+            this.exerciseInput.onchange = (e) => {
+                console.log('Cambio en input de ejercicio detectado:', e.target.value);
+                this.newExerciseInput.classList.toggle('hidden', e.target.value !== 'new');
+            };
         }
         
         console.log('ShaderLoader inicializado correctamente');
@@ -78,17 +186,110 @@ export class ShaderLoader {
     async loadShaderStructure() {
         try {
             console.log('Cargando estructura de shaders...');
-            this.chapters = new Map([
-                ['chapter01', {
-                    name: 'Capítulo 1: Formas Básicas',
-                    exercises: new Map([
-                        ['exercise01', { name: 'Círculo Interactivo' }]
-                    ])
-                }]
-            ]);
+            
+            // Mostrar skeleton loaders y ocultar selectores
+            const chapterSelect = document.getElementById('chapter-select');
+            const exerciseSelect = document.getElementById('exercise-select');
+            const chapterSkeleton = chapterSelect.nextElementSibling;
+            const exerciseSkeleton = exerciseSelect.nextElementSibling;
+            
+            chapterSelect.style.display = 'none';
+            exerciseSelect.style.display = 'none';
+            chapterSkeleton.style.display = 'block';
+            exerciseSkeleton.style.display = 'block';
+            
+            // Inicializar la estructura de shaders
+            this.chapters = new Map();
+            
+            // Obtener la lista de capítulos
+            console.log('Solicitando estructura de shaders al servidor...');
+            const response = await fetch('/api/list-shaders');
+            console.log('Respuesta recibida:', response.status);
+            const result = await response.json();
+            console.log('Resultado:', result);
+            
+            if (!result.success) {
+                throw new Error(result.error || 'Error al cargar la estructura de shaders');
+            }
+            
+            // Procesar la estructura de shaders
+            console.log('Procesando estructura de shaders...');
+            for (const [chapterId, chapterData] of Object.entries(result.structure)) {
+                console.log(`Procesando capítulo ${chapterId}:`, chapterData);
+                this.chapters.set(chapterId, {
+                    name: chapterData.name,
+                    exercises: chapterData.exercises
+                });
+            }
+            
             console.log('Estructura de shaders cargada:', this.chapters);
+            
+            // Actualizar los selectores
+            console.log('Actualizando selectores...');
+            this.updateChapterSelect();
+            this.updateExerciseSelect();
+            
+            // Ocultar skeleton loaders y mostrar selectores
+            chapterSelect.style.display = 'block';
+            exerciseSelect.style.display = 'block';
+            chapterSkeleton.style.display = 'none';
+            exerciseSkeleton.style.display = 'none';
+            
+            // Asegurarnos de que los selectores sean interactivos en caso de error
+            chapterSelect.classList.remove('loading');
+            exerciseSelect.classList.remove('loading');
+            
+            // Cargar estado desde URL si existe
+            const params = new URLSearchParams(window.location.search);
+            const chapter = params.get('chapter');
+            const exercise = params.get('exercise');
+            
+            if (chapter && exercise) {
+                this.currentChapter = chapter;
+                this.updateExerciseSelect();
+                this.currentExercise = exercise;
+                
+                // Actualizar los selectores
+                if (chapterSelect) chapterSelect.value = chapter;
+                if (exerciseSelect) exerciseSelect.value = exercise;
+                
+                await this.loadShader();
+            }
         } catch (error) {
             console.error('Error cargando la estructura de shaders:', error);
+            
+            // Ocultar skeleton loaders y mostrar selectores en caso de error
+            const chapterSelect = document.getElementById('chapter-select');
+            const exerciseSelect = document.getElementById('exercise-select');
+            const chapterSkeleton = chapterSelect.nextElementSibling;
+            const exerciseSkeleton = exerciseSelect.nextElementSibling;
+            
+            chapterSelect.style.display = 'block';
+            exerciseSelect.style.display = 'block';
+            chapterSkeleton.style.display = 'none';
+            exerciseSkeleton.style.display = 'none';
+            
+            throw error;
+        }
+    }
+
+    updateChapterSelect() {
+        const chapterSelect = document.getElementById('chapter-select');
+        console.log('Elemento chapter-select:', chapterSelect ? 'encontrado' : 'no encontrado');
+        if (!chapterSelect) return;
+        
+        console.log('Capítulos disponibles:', Array.from(this.chapters.entries()));
+        
+        chapterSelect.innerHTML = `
+            <option value="">Selecciona un capítulo...</option>
+            ${Array.from(this.chapters.entries()).map(([id, chapter]) => `
+                <option value="${id}">${chapter.name}</option>
+            `).join('')}
+        `;
+        
+        // Mantener la selección actual si existe
+        if (this.currentChapter && this.chapters.has(this.currentChapter)) {
+            chapterSelect.value = this.currentChapter;
         }
     }
 
@@ -103,6 +304,7 @@ export class ShaderLoader {
         }
 
         // Poblar selector de capítulos
+        console.log('Poblando selector de capítulos...');
         chapterSelect.innerHTML = `
             <option value="">Selecciona un capítulo...</option>
             ${Array.from(this.chapters.entries()).map(([id, chapter]) => `
@@ -143,13 +345,22 @@ export class ShaderLoader {
             this.updateSaveButtonVisibility();
         });
 
-        exerciseSelect.addEventListener('change', (e) => {
+        exerciseSelect.addEventListener('change', async (e) => {
             console.log('Ejercicio seleccionado:', e.target.value);
             this.currentExercise = e.target.value;
-            this.loadShader();
+            await this.loadShader();
             this.updateURLParams();
             this.updateSaveButtonVisibility();
         });
+
+        // Mantener la selección actual si existe
+        if (this.currentChapter && this.chapters.has(this.currentChapter)) {
+            chapterSelect.value = this.currentChapter;
+            this.updateExerciseSelect();
+            if (this.currentExercise) {
+                exerciseSelect.value = this.currentExercise;
+            }
+        }
     }
 
     initEditor() {
@@ -187,16 +398,21 @@ export class ShaderLoader {
 
     updateExerciseSelect() {
         const exerciseSelect = document.getElementById('exercise-select');
+        console.log('Elemento exercise-select:', exerciseSelect ? 'encontrado' : 'no encontrado');
         const chapter = this.chapters.get(this.currentChapter);
+        console.log('Capítulo actual:', this.currentChapter);
+        console.log('Capítulo encontrado:', chapter ? 'sí' : 'no');
 
         if (!chapter) {
             exerciseSelect.innerHTML = '<option value="">Selecciona un ejercicio...</option>';
             return;
         }
 
+        console.log('Ejercicios disponibles:', Object.entries(chapter.exercises));
+
         exerciseSelect.innerHTML = `
             <option value="">Selecciona un ejercicio...</option>
-            ${Array.from(chapter.exercises.entries()).map(([id, exercise]) => `
+            ${Object.entries(chapter.exercises).map(([id, exercise]) => `
                 <option value="${id}">${exercise.name}</option>
             `).join('')}
         `;
@@ -380,29 +596,17 @@ export class ShaderLoader {
         
         // Si no hay capítulo o ejercicio seleccionado, ocultar el botón
         if (!this.currentChapter || !this.currentExercise) {
-            this.saveButtonContainer.style.visibility = 'hidden';
+            this.saveButtonContainer.style.display = 'none';
             return;
         }
 
         // Si hay un ejercicio seleccionado, mostrar el botón
-        this.saveButtonContainer.style.visibility = 'visible';
-        console.log(this.saveButtonContainer, 'Estado del botón:', {
-            visible: this.saveButtonContainer.style.visibility,
-            disabled: this.saveButton.disabled,
-            hasChanges: this.hasChanges,
-            chapter: this.currentChapter,
-            exercise: this.currentExercise
-        });
+        this.saveButtonContainer.style.display = 'block';
+      
         
         // El botón está deshabilitado si no hay cambios
         this.saveButton.disabled = !this.hasChanges;
-        console.log('Estado del botón:', {
-            visible: this.saveButtonContainer.style.visibility,
-            disabled: this.saveButton.disabled,
-            hasChanges: this.hasChanges,
-            chapter: this.currentChapter,
-            exercise: this.currentExercise
-        });
+     
     }
 
     updateURLParams() {
@@ -424,5 +628,202 @@ export class ShaderLoader {
         
         const newURL = `${window.location.pathname}${params.toString() ? '?' + params.toString() : ''}`;
         window.history.pushState({}, '', newURL);
+    }
+
+    showSaveModal() {
+        console.log('Mostrando modal de guardar nuevo shader');
+        if (!this.modal) {
+            console.error('Modal no encontrado');
+            return;
+        }
+        
+        // Actualizar la lista de capítulos
+        if (!this.chapterInput) {
+            console.error('Input de capítulo no encontrado');
+            return;
+        }
+        
+        console.log('Actualizando lista de capítulos');
+        this.chapterInput.innerHTML = `
+            <option value="">Seleccionar capítulo existente...</option>
+            ${Array.from(this.chapters.entries()).map(([id, chapter]) => `
+                <option value="${id}">${chapter.name}</option>
+            `).join('')}
+            <option value="new">Crear nuevo capítulo</option>
+        `;
+
+        this.modal.classList.add('show');
+        console.log('Modal mostrado');
+    }
+
+    hideModal() {
+        console.log('Ocultando modal');
+        if (!this.modal) {
+            console.error('Modal no encontrado');
+            return;
+        }
+        
+        this.modal.classList.remove('show');
+        console.log('Clase show removida del modal');
+        
+        // Limpiar inputs
+        if (this.newChapterInput) {
+            this.newChapterInput.value = '';
+            this.newChapterInput.classList.add('hidden');
+            console.log('Input de nuevo capítulo limpiado y ocultado');
+        }
+        
+        if (this.newExerciseInput) {
+            this.newExerciseInput.value = '';
+            this.newExerciseInput.classList.add('hidden');
+            console.log('Input de nuevo ejercicio limpiado y ocultado');
+        }
+        
+        if (this.chapterInput) {
+            this.chapterInput.value = '';
+            console.log('Input de capítulo limpiado');
+        }
+        
+        if (this.exerciseInput) {
+            this.exerciseInput.value = '';
+            console.log('Input de ejercicio limpiado');
+        }
+        
+        console.log('Modal ocultado correctamente');
+    }
+
+    updateExerciseInputOptions(chapterId) {
+        console.log('Actualizando opciones de ejercicio para capítulo:', chapterId);
+        
+        if (!this.exerciseInput) {
+            console.error('Input de ejercicio no encontrado');
+            return;
+        }
+        
+        if (!chapterId || chapterId === 'new') {
+            console.log('Capítulo no seleccionado o nuevo, mostrando opciones por defecto');
+            this.exerciseInput.innerHTML = `
+                <option value="">Seleccionar ejercicio...</option>
+                <option value="new">Crear nuevo ejercicio</option>
+            `;
+            return;
+        }
+
+        const chapter = this.chapters.get(chapterId);
+        if (!chapter) {
+            console.error('Capítulo no encontrado:', chapterId);
+            return;
+        }
+
+        console.log('Capítulo encontrado, actualizando opciones de ejercicio');
+        this.exerciseInput.innerHTML = `
+            <option value="">Seleccionar ejercicio existente...</option>
+            ${Object.entries(chapter.exercises).map(([id, exercise]) => `
+                <option value="${id}">${exercise.name}</option>
+            `).join('')}
+            <option value="new">Crear nuevo ejercicio</option>
+        `;
+    }
+
+    async saveNewShader() {
+        console.log('Guardando nuevo shader...');
+        
+        const chapterId = this.chapterInput.value;
+        const exerciseId = this.exerciseInput.value;
+        const newChapterName = this.newChapterInput.value;
+        const newExerciseName = this.newExerciseInput.value;
+        
+        console.log('Datos del formulario:', {
+            chapterId,
+            exerciseId,
+            newChapterName,
+            newExerciseName
+        });
+        
+        // Validar datos
+        if (chapterId === 'new' && !newChapterName) {
+            console.error('Nombre de capítulo no proporcionado');
+            alert('Por favor, proporciona un nombre para el nuevo capítulo');
+            return;
+        }
+        
+        if (exerciseId === 'new' && !newExerciseName) {
+            console.error('Nombre de ejercicio no proporcionado');
+            alert('Por favor, proporciona un nombre para el nuevo ejercicio');
+            return;
+        }
+        
+        // Determinar el ID del capítulo y ejercicio
+        const finalChapterId = chapterId === 'new' ? newChapterName : chapterId;
+        const finalExerciseId = exerciseId === 'new' ? newExerciseName : exerciseId;
+        
+        if (!finalChapterId || !finalExerciseId) {
+            console.error('Capítulo o ejercicio no seleccionados');
+            alert('Por favor, selecciona o crea un capítulo y ejercicio');
+            return;
+        }
+
+        const shaderCode = this.editor.state.doc.toString();
+        const filePath = `src/shaders/${finalChapterId}/${finalExerciseId}/fragment.glsl`;
+        
+        console.log('Guardando shader en:', filePath);
+
+        try {
+            console.log('Enviando solicitud al servidor');
+            const response = await fetch('/api/save-shader', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    content: shaderCode,
+                    path: filePath,
+                    isNew: true
+                })
+            });
+
+            console.log('Respuesta recibida:', response.status);
+            const result = await response.json();
+            console.log('Resultado:', result);
+            
+            if (!result.success) {
+                throw new Error(result.error || 'Error al guardar el shader');
+            }
+
+            // Actualizar la estructura de shaders
+            console.log('Actualizando estructura de shaders');
+            this.hideModal(); // Ocultar el modal inmediatamente
+            
+            // Actualizar los selectores
+            console.log('Actualizando selectores');
+            this.currentChapter = finalChapterId;
+            this.currentExercise = finalExerciseId;
+            
+            // Actualizar los selectores principales
+            const chapterSelect = document.getElementById('chapter-select');
+            const exerciseSelect = document.getElementById('exercise-select');
+            if (chapterSelect) chapterSelect.value = finalChapterId;
+            this.updateExerciseSelect();
+            if (exerciseSelect) exerciseSelect.value = finalExerciseId;
+
+            // Actualizar URL y estado
+            console.log('Actualizando URL y estado');
+            this.updateURLParams();
+            this.updateSaveButtonVisibility();
+            
+            // Cargar el shader recién creado
+            console.log('Cargando shader recién creado');
+            await this.loadShader();
+            
+            // Recargar la estructura de shaders en segundo plano
+            this.loadShaderStructure().catch(error => {
+                console.error('Error recargando la estructura de shaders:', error);
+            });
+            
+            console.log('Shader guardado correctamente');
+        } catch (error) {
+            console.error('Error guardando shader:', error);
+            alert('Error al guardar el shader: ' + error.message);
+        }
     }
 } 

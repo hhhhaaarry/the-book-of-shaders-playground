@@ -12,21 +12,81 @@
         <div class="button-group">
           <button id="new-shader-btn" class="btn">Nuevo Shader</button>
           <button id="duplicate-shader-btn" class="btn">Duplicar Shader</button>
-          
         </div>
         <div class="selectors">
-          <select id="chapter-select">
-            <option value="">Seleccionar Capítulo</option>
-          </select>
-          <select id="exercise-select">
-            <option value="">Seleccionar Ejercicio</option>
-          </select>
+          <div class="select-container">
+            <select id="chapter-select" class="loading">
+              <option value="">Seleccionar Capítulo</option>
+            </select>
+            <div class="skeleton skeleton-select" style="display: none;"></div>
+          </div>
+          <div class="select-container">
+            <select id="exercise-select" class="loading">
+              <option value="">Seleccionar Ejercicio</option>
+            </select>
+            <div class="skeleton skeleton-select" style="display: none;"></div>
+          </div>
         </div>
 
         <div id="shader-editor"></div>
-        
-        <div id="save-button-container" style="visibility: hidden;">
-          <button id="save-shader-btn" class="btn btn-primary" disabled>Sobreescribir Shader</button>
+        <div class="save-buttons">
+          <div id="save-button-container" style="display: none">
+            <button id="save-shader-btn" class="btn btn-primary" disabled>
+              Sobreescribir Shader
+            </button>
+          </div>
+
+          <div id="save-new-button-container">
+            <button id="save-new-shader-btn" class="btn btn-success">
+              Guardar como Nuevo Shader
+            </button>
+          </div>
+        </div>
+
+        <!-- Modal para guardar nuevo shader -->
+        <div id="save-modal" class="modal">
+          <div class="modal-content">
+            <h2>Guardar Nuevo Shader</h2>
+
+            <div class="modal-form">
+              <div class="form-group">
+                <label for="chapter-input">Capítulo:</label>
+                <select id="chapter-input">
+                  <option value="">Seleccionar capítulo existente...</option>
+                  <option value="new">Crear nuevo capítulo</option>
+                </select>
+                <input
+                  type="text"
+                  id="new-chapter-input"
+                  class="hidden"
+                  placeholder="Nombre del nuevo capítulo"
+                />
+              </div>
+
+              <div class="form-group">
+                <label for="exercise-input">Ejercicio:</label>
+                <select id="exercise-input">
+                  <option value="">Seleccionar ejercicio existente...</option>
+                  <option value="new">Crear nuevo ejercicio</option>
+                </select>
+                <input
+                  type="text"
+                  id="new-exercise-input"
+                  class="hidden"
+                  placeholder="Nombre del nuevo ejercicio"
+                />
+              </div>
+            </div>
+
+            <div class="modal-buttons">
+              <button id="save-modal-btn" class="btn btn-success">
+                Guardar
+              </button>
+              <button id="cancel-modal-btn" class="btn btn-secondary">
+                Cancelar
+              </button>
+            </div>
+          </div>
         </div>
 
         <div class="uniforms">
