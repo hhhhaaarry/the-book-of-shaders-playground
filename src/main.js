@@ -103,6 +103,11 @@ class ShaderPlayground {
             resizeHandle.classList.remove('active');
             document.body.style.cursor = '';
         });
+
+        // Añadir evento para el botón de nuevo shader
+        document.getElementById('new-shader-btn').addEventListener('click', () => {
+            this.shaderLoader.createNewShader();
+        });
     }
 
     updateResolution() {
