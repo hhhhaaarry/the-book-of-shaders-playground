@@ -1,4 +1,4 @@
-import shaderResources from './resources.js';
+// import shaderResources from './resources.js';
 import * as THREE from 'three';
 import { EditorView, basicSetup } from 'codemirror';
 import { javascript } from '@codemirror/lang-javascript';
@@ -12,7 +12,9 @@ export class ShaderLoader {
         this.editor = null;
         this.currentShader = null;
         this.shaderCache = new Map();
-        this.resourcesList = document.getElementById('resources-list');
+        this.defaultShader = null;
+        this.loadDefaultShader();
+        // this.resourcesList = document.getElementById('resources-list');
         this.initEditor();
     }
 
@@ -21,7 +23,7 @@ export class ShaderLoader {
         // Cargar la estructura de shaders
         await this.loadShaderStructure();
         this.setupUI();
-        this.setupResources();
+        // this.setupResources();
         console.log('ShaderLoader inicializado correctamente');
     }
 
@@ -109,36 +111,7 @@ export class ShaderLoader {
         });
     }
 
-    setupResources() {
-        // Crear lista de recursos
-        let resourcesHTML = '';
-        
-        for (const [category, data] of Object.entries(shaderResources)) {
-            resourcesHTML += `<div class="resource-category">
-                <h4>${data.name}</h4>
-            `;
-            
-            for (const item of data.items) {
-                resourcesHTML += `
-                <div class="resource-item" data-code="${this.escapeHTML(item.code)}">
-                    ${item.name}
-                </div>`;
-            }
-            
-            resourcesHTML += '</div>';
-        }
-        
-        this.resourcesList.innerHTML = resourcesHTML;
-        
-        // Añadir eventos a los recursos
-        const resourceItems = this.resourcesList.querySelectorAll('.resource-item');
-        resourceItems.forEach(item => {
-            item.addEventListener('click', () => {
-                const code = item.getAttribute('data-code');
-                this.insertResource(code);
-            });
-        });
-    }
+    
 
     escapeHTML(str) {
         return str.replace(/&/g, '&amp;')
@@ -148,26 +121,26 @@ export class ShaderLoader {
                  .replace(/'/g, '&#039;');
     }
 
-    insertResource(code) {
-        // Obtener la posición actual del cursor
-        const cursorPos = this.editor.getCursor();
+    // insertResource(code) {
+    //     // Obtener la posición actual del cursor
+    //     const cursorPos = this.editor.getCursor();
         
-        // Insertar el código en la posición del cursor
-        this.editor.dispatch({
-            changes: {
-                from: cursorPos.from,
-                to: cursorPos.to,
-                insert: code
-            }
-        });
+    //     // Insertar el código en la posición del cursor
+    //     this.editor.dispatch({
+    //         changes: {
+    //             from: cursorPos.from,
+    //             to: cursorPos.to,
+    //             insert: code
+    //         }
+    //     });
         
-        // Mover el cursor al final del código insertado
-        const newCursorPos = {
-            line: cursorPos.line + code.split('\n').length - 1,
-            ch: code.split('\n').pop().length
-        };
-        this.editor.setCursor(newCursorPos);
-    }
+    //     // Mover el cursor al final del código insertado
+    //     const newCursorPos = {
+    //         line: cursorPos.line + code.split('\n').length - 1,
+    //         ch: code.split('\n').pop().length
+    //     };
+    //     this.editor.setCursor(newCursorPos);
+    // }
 
     updateExerciseSelect() {
         const exerciseSelect = document.getElementById('exercise-select');
@@ -265,5 +238,37 @@ export class ShaderLoader {
             console.error('Error guardando el shader:', error);
             alert('Error al guardar el shader.');
         }
+    }
+
+    async loadDefaultShader() {
+        try {
+            const response = await fetch('/src/shaders/default.fragment.glsl');
+            this.defaultShader = await response.text();
+            this.setShader(this.defaultShader);
+        } catch (error) {
+            console.error('Error loading default shader:', error);
+        }
+    }
+
+    createNewShader() {
+        this.setShader(this.defaultShader);
+        // Limpiar los selectores
+        const chapterSelect = document.getElementById('chapter-select');
+        const exerciseSelect = document.getElementById('exercise-select');
+        if (chapterSelect) chapterSelect.value = '';
+        if (exerciseSelect) exerciseSelect.value = '';
+    }
+
+    setShader(shaderCode) {
+        this.currentShader = {
+            fragment: shaderCode,
+            uniforms: {
+                u_resolution: { value: new THREE.Vector2() },
+                u_mouse: { value: new THREE.Vector2() },
+                u_time: { value: 0 }
+            }
+        };
+        this.updateEditor(this.currentShader.fragment);
+        this.onShaderChange(this.currentShader.fragment);
     }
 } 

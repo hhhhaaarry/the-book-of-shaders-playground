@@ -125,39 +125,3 @@ select {
     background: #555;
 }
 
-/* Estilos para recursos */
-.resources {
-    margin-top: 20px;
-    border-top: 1px solid #555;
-    padding-top: 20px;
-}
-
-.resources h3 {
-    margin-top: 0;
-    margin-bottom: 10px;
-    font-size: 16px;
-}
-
-.resource-category {
-    margin-bottom: 15px;
-}
-
-.resource-category h4 {
-    margin: 0 0 5px 0;
-    font-size: 14px;
-    color: #aaa;
-}
-
-.resource-item {
-    padding: 5px 10px;
-    background: #333;
-    margin-bottom: 5px;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 12px;
-    transition: background 0.2s;
-}
-
-.resource-item:hover {
-    background: #444;
-} 
