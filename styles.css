@@ -1,0 +1,163 @@
+body {
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    background: #1a1a1a;
+    color: #fff;
+    font-family: monospace;
+}
+
+.container {
+    display: flex;
+    height: 100vh;
+}
+
+.sidebar {
+    width: 300px;
+    min-width: 200px;
+    max-width: 1920px;
+    padding: 20px;
+    background: rgba(0, 0, 0, 0.8);
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    resize: horizontal;
+    overflow: auto;
+}
+
+.resize-handle {
+    width: 4px;
+    background: #333;
+    cursor: col-resize;
+    transition: background 0.2s;
+}
+
+.resize-handle:hover,
+.resize-handle.active {
+    background: #555;
+}
+
+.shader-selector {
+    margin-bottom: 20px;
+}
+
+select {
+    background: #333;
+    color: #fff;
+    border: 1px solid #555;
+    padding: 5px;
+    width: 100%;
+    margin-bottom: 10px;
+    border-radius: 4px;
+}
+
+#shader-editor {
+    flex: 1;
+    min-height: 300px;
+    background: #272822;
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 20px;
+}
+
+.main-content {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    min-width: 0;
+    overflow: hidden;
+}
+
+#shader-preview {
+    aspect-ratio: 1/1;
+    width: min(80vh, 80vw);
+    background: #000;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+/* Estilos para CodeMirror */
+.cm-editor {
+    height: 100%;
+}
+
+.cm-editor.cm-focused {
+    outline: none;
+}
+
+/* Estilos para uniforms */
+.uniforms {
+    margin-top: 20px;
+    border-top: 1px solid #555;
+    padding-top: 20px;
+    margin-bottom: 20px;
+}
+
+.uniforms h3 {
+    margin-top: 0;
+    margin-bottom: 10px;
+    font-size: 16px;
+}
+
+.uniform-info {
+    margin-bottom: 5px;
+    font-size: 12px;
+    color: #aaa;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.uniform-button {
+    background: #444;
+    color: #fff;
+    border: none;
+    padding: 2px 8px;
+    border-radius: 3px;
+    font-size: 10px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.uniform-button:hover {
+    background: #555;
+}
+
+/* Estilos para recursos */
+.resources {
+    margin-top: 20px;
+    border-top: 1px solid #555;
+    padding-top: 20px;
+}
+
+.resources h3 {
+    margin-top: 0;
+    margin-bottom: 10px;
+    font-size: 16px;
+}
+
+.resource-category {
+    margin-bottom: 15px;
+}
+
+.resource-category h4 {
+    margin: 0 0 5px 0;
+    font-size: 14px;
+    color: #aaa;
+}
+
+.resource-item {
+    padding: 5px 10px;
+    background: #333;
+    margin-bottom: 5px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+    transition: background 0.2s;
+}
+
+.resource-item:hover {
+    background: #444;
+} 

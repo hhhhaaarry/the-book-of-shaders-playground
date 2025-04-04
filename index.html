@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Book of Shaders - Playground</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <div class="sidebar">
+            <div class="shader-selector">
+                <select id="chapter-select">
+                    <option value="">Selecciona un capítulo</option>
+                </select>
+                <select id="exercise-select">
+                    <option value="">Selecciona un ejercicio</option>
+                </select>
+            </div>
+            <div id="shader-editor"></div>
+            <div class="uniforms">
+                <h3>Uniforms</h3>
+                <div class="uniform-info">Mouse: <span id="mouse-position">x: 0.00, y: 0.00</span></div>
+                <div class="uniform-info">
+                    Tiempo: <span id="time">0.00</span>
+                    <button id="reset-time" class="uniform-button">Reset</button>
+                </div>
+                <div class="uniform-info">Resolución: <span id="resolution">0 x 0</span></div>
+            </div>
+            <div class="resources">
+                <h3>Recursos</h3>
+                <div id="resources-list"></div>
+            </div>
+        </div>
+        <div class="resize-handle"></div>
+        <div class="main-content">
+            <div id="shader-preview"></div>
+        </div>
+    </div>
+    <script type="module" src="/src/main.js"></script>
+</body>
+</html> 
