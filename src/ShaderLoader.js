@@ -14,6 +14,7 @@ export class ShaderLoader {
         this.shaderCache = new Map();
         this.defaultShader = null;
         this.hasChanges = false;
+        this.isDuplicatedShader = false;
         
         // Configurar el botón de guardar inmediatamente
         const saveButton = document.getElementById('save-shader-btn');
@@ -170,6 +171,9 @@ export class ShaderLoader {
                 exerciseSkeleton.style.display = 'none';
             }
             
+            // Actualizar breadcrumb al final de la inicialización
+            this.updateBreadcrumb();
+            
             console.log('ShaderLoader inicializado correctamente');
         } catch (error) {
             console.error('Error durante la inicialización:', error);
@@ -180,6 +184,7 @@ export class ShaderLoader {
                 chapterSkeleton.style.display = 'none';
                 exerciseSkeleton.style.display = 'none';
             }
+            this.updateBreadcrumb(); // Asegurar que se muestre el estado correcto incluso en caso de error
         }
     }
 
@@ -370,6 +375,7 @@ export class ShaderLoader {
                 this.currentExercise = '';
                 exerciseSelect.value = '';
                 this.updateExerciseSelect();
+                this.updateBreadcrumb();
                 
                 if (!selectedChapter) {
                     console.log('Capítulo deseleccionado, volviendo al shader por defecto');
@@ -385,6 +391,7 @@ export class ShaderLoader {
         if (!exerciseSelect.hasEventListener) {
             exerciseSelect.addEventListener('change', async (e) => {
                 this.currentExercise = e.target.value;
+                this.updateBreadcrumb();
                 await this.loadShader();
                 this.updateURLParams();
                 this.updateSaveButtonVisibility();
@@ -605,6 +612,8 @@ export class ShaderLoader {
             this.hasChanges = false;
             this.updateSaveButtonVisibility();
             this.updateURLParams();
+            this.isDuplicatedShader = false;
+            this.updateBreadcrumb();
             return;
         }
         
@@ -649,6 +658,8 @@ export class ShaderLoader {
             this.hasChanges = false;
             this.updateSaveButtonVisibility();
             this.updateURLParams();
+            this.isDuplicatedShader = false;
+            this.updateBreadcrumb();
         } catch (error) {
             console.error('Error cargando el shader:', error);
             alert(`Error al cargar el shader: ${error.message}`);
@@ -806,6 +817,8 @@ export class ShaderLoader {
         this.hasChanges = false;
         this.updateSaveButtonVisibility();
         this.updateURLParams();
+        this.isDuplicatedShader = false;
+        this.updateBreadcrumb();
     }
 
     duplicateCurrentShader() {
@@ -819,6 +832,8 @@ export class ShaderLoader {
         this.setShader(currentCode);
         this.updateSaveButtonVisibility();
         this.updateURLParams();
+        this.isDuplicatedShader = true;
+        this.updateBreadcrumb();
     }
 
     setShader(shaderCode) {
@@ -1073,5 +1088,25 @@ export class ShaderLoader {
             console.error('Error en saveNewShader:', error);
             alert('Error al guardar el shader: ' + error.message);
         }
+    }
+
+    updateBreadcrumb() {
+        const breadcrumb = document.getElementById('shader-breadcrumb');
+        if (!breadcrumb) return;
+
+        let text = '';
+        
+        if (this.currentChapter && this.currentExercise) {
+            // Caso normal: capítulo y ejercicio seleccionados
+            text = `Capítulo: ${this.currentChapter} > Ejercicio: ${this.currentExercise}`;
+        } else if (this.isDuplicatedShader) {
+            // Caso de shader duplicado
+            text = 'Shader duplicado';
+        } else {
+            // Caso por defecto
+            text = 'Shader por defecto';
+        }
+
+        breadcrumb.textContent = text;
     }
 } 

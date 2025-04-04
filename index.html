@@ -18,13 +18,13 @@
             <select id="chapter-select" class="loading">
               <option value="">Seleccionar Capítulo</option>
             </select>
-            <div class="skeleton skeleton-select" style="display: none;"></div>
+            <div class="skeleton skeleton-select" style="display: none"></div>
           </div>
           <div class="select-container">
             <select id="exercise-select" class="loading">
               <option value="">Seleccionar Ejercicio</option>
             </select>
-            <div class="skeleton skeleton-select" style="display: none;"></div>
+            <div class="skeleton skeleton-select" style="display: none"></div>
           </div>
         </div>
 
@@ -105,7 +105,12 @@
       </div>
       <div class="resize-handle"></div>
       <div class="main-content">
-        <div id="shader-preview"></div>
+        <div class="shader-wrapper">
+          <div id="shader-breadcrumb" class="shader-breadcrumb">
+            Shader por defecto
+          </div>
+          <div id="shader-preview"></div>
+        </div>
       </div>
     </div>
     <script type="module" src="/src/main.js"></script>
