@@ -108,6 +108,11 @@ class ShaderPlayground {
         document.getElementById('new-shader-btn').addEventListener('click', () => {
             this.shaderLoader.createNewShader();
         });
+
+        // Añadir evento para el botón de duplicar shader
+        document.getElementById('duplicate-shader-btn').addEventListener('click', () => {
+            this.shaderLoader.duplicateCurrentShader();
+        });
     }
 
     updateResolution() {

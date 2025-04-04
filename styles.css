@@ -14,7 +14,7 @@ body {
 }
 
 .sidebar {
-    width: 300px;
+    width: 500px;
     min-width: 200px;
     max-width: 1920px;
     padding: 20px;
@@ -145,12 +145,43 @@ select {
     background-color: #45a049;
 }
 
+.btn:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+.btn-primary {
+    background-color: #007bff;
+}
+
+.btn-primary:hover {
+    background-color: #0056b3;
+}
+
+.btn-primary:disabled {
+    background-color: #6c757d;
+}
+
 .selectors {
     display: flex;
     flex-direction: column;
     gap: 4px;
-    margin-bottom: 10px;
     align-items: center;
-    margin-top: 16px;
+    margin-bottom: 16px;
+}
+
+.button-group {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 16px;
+}
+
+.button-group .btn {
+    flex: 1;
+}
+
+.hidden {
+    display: none !important;
 }
 
