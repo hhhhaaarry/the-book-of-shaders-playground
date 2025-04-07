@@ -19,6 +19,7 @@ async function readShaderStructure(dir) {
       
       if (entry.isDirectory()) {
         const chapterPath = path.join(dir, entry.name);
+        const chapterStats = await fs.stat(chapterPath); // Obtener stats del capítulo
         const exercises = {};
         
         // Leer los ejercicios dentro del capítulo
@@ -28,10 +29,10 @@ async function readShaderStructure(dir) {
           if (exerciseEntry.isDirectory()) {
             const fragmentPath = path.join(chapterPath, exerciseEntry.name, 'fragment.glsl');
             try {
-              // Verificar si existe el archivo fragment.glsl
-              await fs.access(fragmentPath);
+              const fragmentStats = await fs.stat(fragmentPath); // Obtener stats del archivo
               exercises[exerciseEntry.name] = {
-                name: exerciseEntry.name
+                name: exerciseEntry.name,
+                createdAt: fragmentStats.birthtime.toISOString() // Añadir fecha de creación
               };
             } catch (error) {
               // Si no existe fragment.glsl, ignorar este ejercicio
@@ -44,7 +45,8 @@ async function readShaderStructure(dir) {
         if (Object.keys(exercises).length > 0) {
           structure[entry.name] = {
             name: entry.name,
-            exercises
+            exercises,
+            createdAt: chapterStats.birthtime.toISOString() // Añadir fecha de creación
           };
         }
       }

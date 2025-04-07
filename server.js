@@ -38,7 +38,6 @@ async function getShaderStructure() {
     const chapters = await fs.readdir(shadersDir);
     const structure = {};
     
-    // Leer todos los directorios en paralelo
     const chapterPromises = chapters.map(async (chapter) => {
         const chapterPath = path.join(shadersDir, chapter);
         try {
@@ -54,8 +53,11 @@ async function getShaderStructure() {
                     const exerciseStats = await fs.stat(exercisePath);
                     if (!exerciseStats.isDirectory()) return null;
                     
-                    await fs.access(fragmentPath);
-                    return { name: exercise };
+                    const fragmentStats = await fs.stat(fragmentPath);
+                    return { 
+                        name: exercise,
+                        createdAt: fragmentStats.birthtime.toISOString()
+                    };
                 } catch (err) {
                     return null;
                 }
@@ -75,14 +77,14 @@ async function getShaderStructure() {
                     chapter,
                     data: {
                         name: chapter,
-                        exercises: exerciseMap
+                        exercises: exerciseMap,
+                        createdAt: chapterStats.birthtime.toISOString()
                     }
                 };
             }
         } catch (err) {
             return null;
         }
-        return null;
     });
     
     const results = await Promise.all(chapterPromises);

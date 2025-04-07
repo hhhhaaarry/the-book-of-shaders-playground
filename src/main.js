@@ -35,15 +35,17 @@ class ShaderPlayground {
 
         // Crear el plano para el shader
         const geometry = new THREE.PlaneGeometry(2, 2);
-        const material = new THREE.ShaderMaterial({
+        const material = new THREE.RawShaderMaterial({
             uniforms: {
                 u_resolution: { value: new THREE.Vector2(size, size) },
                 u_mouse: { value: new THREE.Vector2() },
                 u_time: { value: 0 }
             },
             vertexShader: `
+         
+                
                 void main() {
-                    gl_Position = vec4(position, 1.0);
+                    gl_Position = projectionMatrix * viewMatrix * modelMatrix * vec4(position, 1.0);
                 }
             `,
             fragmentShader: `
@@ -192,9 +194,22 @@ class ShaderPlayground {
             currentContent: errorContent?.textContent
         });
 
-        // Actualizar el shader
-        this.mesh.material.fragmentShader = code;
-        this.mesh.material.needsUpdate = true;
+        // Crear un nuevo material cada vez para forzar recompilación
+        const newMaterial = new THREE.ShaderMaterial({
+            uniforms: this.mesh.material.uniforms,
+            fragmentShader: code,
+            vertexShader: this.mesh.material.vertexShader
+        });
+
+        // Destruir el programa anterior si existe
+        if (this.mesh.material.program) {
+            const gl = this.renderer.getContext();
+            gl.deleteProgram(this.mesh.material.program.program);
+        }
+
+        // Asignar el nuevo material
+        this.mesh.material.dispose();
+        this.mesh.material = newMaterial;
 
         // Capturar los console.error originales
         const originalConsoleError = console.error;
@@ -210,57 +225,41 @@ class ShaderPlayground {
             originalConsoleError.apply(console, args);
         };
 
-        // Intentar renderizar
-        this.renderer.render(this.scene, this.camera);
+        try {
+            // Forzar una nueva compilación y renderizado
+            this.renderer.render(this.scene, this.camera);
 
-        // Restaurar console.error
-        console.error = originalConsoleError;
-
-        // Procesar el error si existe
-        if (shaderError && errorDrawer && errorContent) {
-            const errorLines = shaderError
-                .split('\n')
-                .filter(line => line.includes('ERROR:'))
-                .map(line => {
-                    const match = line.match(/ERROR: \d+:(\d+): (.+)/);
-                    if (match) {
-                        const [, lineNum, message] = match;
-                        return `Línea ${lineNum}: ${message}`;
-                    }
-                    return line.trim();
-                })
-                .filter(Boolean);
-
-            if (errorLines.length > 0) {
-                console.log('Preparando para mostrar error:', {
-                    errorLines,
-                    hasVisibleClass: errorDrawer.classList.contains('visible')
-                });
-                
-                errorContent.textContent = errorLines.join('\n');
-                // Forzar un reflow antes de añadir la clase
-                void errorDrawer.offsetHeight;
-                errorDrawer.classList.add('visible');
-                
-                console.log('Estado después de mostrar error:', {
-                    hasVisibleClass: errorDrawer.classList.contains('visible'),
-                    content: errorContent.textContent
-                });
+            // Si llegamos aquí, el shader compiló correctamente
+            if (errorDrawer) {
+                errorDrawer.classList.remove('visible');
             }
-        } else if (!this.mesh.material.program && errorDrawer?.classList.contains('visible')) {
-            // No ocultamos el drawer si no hay programa compilado y ya estaba visible
-            console.log('Manteniendo drawer visible porque el shader aún no está compilado');
-        } else if (errorDrawer && this.mesh.material.program) {
-            // Solo ocultamos el drawer si el shader compiló correctamente
-            console.log('Shader compilado correctamente, ocultando drawer');
-            errorDrawer.classList.remove('visible');
-        }
+        } catch (error) {
+            console.error('Error al renderizar:', error);
+        } finally {
+            // Restaurar console.error
+            console.error = originalConsoleError;
 
-        console.log('updateShader finalizado:', {
-            hasVisibleClass: errorDrawer?.classList.contains('visible'),
-            content: errorContent?.textContent,
-            hasProgram: !!this.mesh.material.program
-        });
+            // Procesar el error si existe
+            if (shaderError && errorDrawer && errorContent) {
+                const errorLines = shaderError
+                    .split('\n')
+                    .filter(line => line.includes('ERROR:'))
+                    .map(line => {
+                        const match = line.match(/ERROR: \d+:(\d+): (.+)/);
+                        if (match) {
+                            const [, lineNum, message] = match;
+                            return `Línea ${lineNum}: ${message}`;
+                        }
+                        return line.trim();
+                    })
+                    .filter(Boolean);
+
+                if (errorLines.length > 0) {
+                    errorContent.textContent = errorLines.join('\n');
+                    errorDrawer.classList.add('visible');
+                }
+            }
+        }
     }
 
     formatShaderError(errorMessage) {

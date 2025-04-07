@@ -248,11 +248,10 @@ export class ShaderLoader {
             for (const [chapterId, chapterData] of Object.entries(result.structure)) {
                 this.chapters.set(chapterId, {
                     name: chapterData.name,
-                    exercises: chapterData.exercises
+                    exercises: chapterData.exercises,
+                    createdAt: chapterData.createdAt
                 });
             }
-            
-            console.log('Estructura actualizada:', this.chapters);
             
             // Actualizar los selectores
             this.updateChapterSelect();
@@ -317,18 +316,24 @@ export class ShaderLoader {
         defaultOption.textContent = 'Seleccionar capítulo...';
         chapterSelect.appendChild(defaultOption);
         
+        // Convertir el Map a array y ordenar por fecha de creación
+        const sortedChapters = Array.from(this.chapters.entries())
+            .sort((a, b) => {
+                const dateA = new Date(a[1].createdAt || 0);
+                const dateB = new Date(b[1].createdAt || 0);
+                return dateA - dateB;
+            });
+        
         // Añadir cada capítulo
-        for (const [id, chapter] of this.chapters.entries()) {
-            console.log('Añadiendo capítulo:', { id, name: chapter.name });
+        for (const [id, chapter] of sortedChapters) {
             const option = document.createElement('option');
             option.value = id;
             option.textContent = chapter.name;
             chapterSelect.appendChild(option);
         }
 
-        // Si hay un capítulo seleccionado, mantenerlo
+        // Mantener la selección actual si existe
         if (this.currentChapter && this.chapters.has(this.currentChapter)) {
-            console.log('Manteniendo capítulo seleccionado:', this.currentChapter);
             chapterSelect.value = this.currentChapter;
         }
 
@@ -359,10 +364,17 @@ export class ShaderLoader {
             currentExercise: currentExerciseValue
         });
 
-        // Actualizar las opciones del selector de capítulos
+        // Actualizar las opciones del selector de capítulos ordenados por fecha
+        const sortedChapters = Array.from(this.chapters.entries())
+            .sort((a, b) => {
+                const dateA = new Date(a[1].createdAt || 0);
+                const dateB = new Date(b[1].createdAt || 0);
+                return dateA - dateB;
+            });
+
         chapterSelect.innerHTML = `
             <option value="">Seleccionar Capítulo</option>
-            ${Array.from(this.chapters.entries()).map(([id, chapter]) => `
+            ${sortedChapters.map(([id, chapter]) => `
                 <option value="${id}">${chapter.name}</option>
             `).join('')}
         `;
@@ -531,21 +543,25 @@ export class ShaderLoader {
         const chapterData = this.chapters.get(this.currentChapter);
         console.log('Datos del capítulo para ejercicios:', chapterData);
 
-        // Obtener ejercicios del objeto
-        const exercises = Object.keys(chapterData.exercises || {});
-        console.log('Ejercicios disponibles:', exercises);
+        // Convertir ejercicios a array y ordenar por fecha
+        const exercises = Object.entries(chapterData.exercises || {})
+            .sort((a, b) => {
+                const dateA = new Date(a[1].createdAt || 0);
+                const dateB = new Date(b[1].createdAt || 0);
+                return dateA - dateB;
+            });
 
         // Actualizar las opciones
         exerciseSelect.innerHTML = `
             <option value="">Seleccionar Ejercicio</option>
-            ${exercises.map(exercise => `
-                <option value="${exercise}">${exercise}</option>
+            ${exercises.map(([id, exercise]) => `
+                <option value="${id}">${exercise.name}</option>
             `).join('')}
         `;
         exerciseSelect.disabled = false;
 
         // Restaurar el valor si existía y está disponible
-        if (this.currentExercise && exercises.includes(this.currentExercise)) {
+        if (this.currentExercise && chapterData.exercises[this.currentExercise]) {
             console.log('Restaurando ejercicio:', this.currentExercise);
             exerciseSelect.value = this.currentExercise;
         } else {
@@ -899,17 +915,21 @@ export class ShaderLoader {
     }
 
     showSaveModal() {
-        if (!this.modal) {
+        if (!this.modal || !this.chapterInput) {
             return;
         }
         
-        if (!this.chapterInput) {
-            return;
-        }
+        // Ordenar capítulos por fecha de creación
+        const sortedChapters = Array.from(this.chapters.entries())
+            .sort((a, b) => {
+                const dateA = new Date(a[1].createdAt || 0);
+                const dateB = new Date(b[1].createdAt || 0);
+                return dateA - dateB;
+            });
         
         this.chapterInput.innerHTML = `
             <option value="">Seleccionar capítulo existente...</option>
-            ${Array.from(this.chapters.entries()).map(([id, chapter]) => `
+            ${sortedChapters.map(([id, chapter]) => `
                 <option value="${id}">${chapter.name}</option>
             `).join('')}
             <option value="new">Crear nuevo capítulo</option>
@@ -962,9 +982,17 @@ export class ShaderLoader {
             return;
         }
 
+        // Convertir ejercicios a array y ordenar por fecha
+        const sortedExercises = Object.entries(chapter.exercises)
+            .sort((a, b) => {
+                const dateA = new Date(a[1].createdAt || 0);
+                const dateB = new Date(b[1].createdAt || 0);
+                return dateA - dateB;
+            });
+
         this.exerciseInput.innerHTML = `
             <option value="">Seleccionar ejercicio existente...</option>
-            ${Object.entries(chapter.exercises).map(([id, exercise]) => `
+            ${sortedExercises.map(([id, exercise]) => `
                 <option value="${id}">${exercise.name}</option>
             `).join('')}
             <option value="new">Crear nuevo ejercicio</option>
