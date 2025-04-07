@@ -28,7 +28,15 @@
           </div>
         </div>
 
-        <div id="shader-editor"></div>
+        <div class="editor-container">
+          <div class="editor-tabs">
+            <button id="fragment-tab" class="tab-button active">
+              Fragment
+            </button>
+            <button id="vertex-tab" class="tab-button">Vertex</button>
+          </div>
+          <div id="shader-editor"></div>
+        </div>
         <div class="save-buttons">
           <div id="save-button-container" style="display: none">
             <button id="save-shader-btn" class="btn btn-primary" disabled>
@@ -121,7 +129,7 @@
         </div>
       </div>
     </div>
-    
+
     <script type="module" src="/src/main.js"></script>
   </body>
 </html>

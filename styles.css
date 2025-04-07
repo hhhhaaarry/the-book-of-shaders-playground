@@ -1,6 +1,6 @@
 body {
   margin: 0;
-  padding: 0;
+  height: 100vh;
   overflow: hidden;
   background: #1a1a1a;
   color: #fff;
@@ -11,19 +11,21 @@ body {
 .container {
   display: flex;
   height: 100vh;
+  overflow: hidden;
 }
 
 .sidebar {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+  padding: 16px;
+  box-sizing: border-box;
   width: 500px;
   min-width: 200px;
   max-width: 1920px;
-  padding: 24px;
   background: rgba(0, 0, 0, 0.8);
-  overflow-y: auto;
-  display: flex;
-  flex-direction: column;
   resize: horizontal;
-  overflow: auto;
 }
 
 .resize-handle {
@@ -49,12 +51,51 @@ select {
 }
 
 #shader-editor {
+  margin-top: 20px;
   flex: 1;
-  min-height: 300px;
-  background: #272822;
-  border-radius: 4px;
+  min-height: 0;
   overflow: hidden;
+  background: #282c34;
+  border-radius: 4px;
   margin-bottom: 16px;
+}
+
+.editor-container {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  max-height: calc(100vh - 120px);
+  position: relative;
+}
+
+.editor-tabs {
+  position: absolute;
+  top: 0;
+  left: 0;
+  flex-shrink: 0;
+  z-index: 10;
+  display: flex;
+  height: 20px;
+}
+
+.tab-button {
+  background: #222;
+  color: #555;
+  border: none;
+  cursor: pointer;
+  height: 21px;
+  border-radius: 4px 4px 0 0;
+  -webkit-border-radius: 4px 4px 0 0;
+  -moz-border-radius: 4px 4px 0 0;
+  -ms-border-radius: 4px 4px 0 0;
+  -o-border-radius: 4px 4px 0 0;
+}
+
+.tab-button.active {
+  background: #282c34;
+  color: #d1d1d1;
 }
 
 .main-content {
@@ -69,6 +110,7 @@ select {
   overflow: hidden;
   position: relative;
 }
+
 .shader-wrapper {
   display: flex;
   flex-direction: column;
@@ -83,6 +125,7 @@ select {
   border-radius: 4px;
   overflow: hidden;
 }
+
 .shader-breadcrumb {
   font-family: monospace;
   color: #d4d4d4;
@@ -96,6 +139,10 @@ select {
 
 .cm-editor.cm-focused {
   outline: none;
+}
+
+.cm-scroller {
+  overflow: auto !important;
 }
 
 /* Estilos para uniforms */
@@ -181,6 +228,7 @@ select {
   margin-top: 16px;
   margin-bottom: 16px;
 }
+
 .select-container {
   width: 100%;
   display: flex;
@@ -334,78 +382,99 @@ select {
 }
 
 .shader-error-drawer {
-    position: absolute;
-    bottom: -300px;
-    left: 0;
-    right: 0;
-    background-color: #2c1212;
-    color: #ff9999;
-    border-top: 2px solid #ff6666;
-    max-height: 300px;
-    transition: transform 0.3s ease-in-out;
-    z-index: 1000;
-    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.3);
-    pointer-events: auto;
+  position: absolute;
+  bottom: -300px;
+  left: 0;
+  right: 0;
+  background-color: #2c1212;
+  color: #ff9999;
+  border-top: 2px solid #ff6666;
+  max-height: 300px;
+  transition: transform 0.3s ease-in-out;
+  z-index: 1000;
+  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.3);
+  pointer-events: auto;
 }
 
 .shader-error-drawer.visible {
-    transform: translateY(-300px);
-  
+  transform: translateY(-300px);
 }
 
 .shader-error-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 8px 16px;
-    background-color: #3c1818;
-    border-bottom: 1px solid #ff6666;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 16px;
+  background-color: #3c1818;
+  border-bottom: 1px solid #ff6666;
 }
 
 .error-title {
-    font-weight: bold;
-    font-size: 0.9rem;
+  font-weight: bold;
+  font-size: 0.9rem;
 }
 
 .error-close {
-    background: none;
-    border: none;
-    color: #ff9999;
-    font-size: 1.5rem;
-    cursor: pointer;
-    padding: 0 4px;
-    line-height: 1;
-    transition: color 0.2s ease;
+  background: none;
+  border: none;
+  color: #ff9999;
+  font-size: 1.5rem;
+  cursor: pointer;
+  padding: 0 4px;
+  line-height: 1;
+  transition: color 0.2s ease;
 }
 
 .error-close:hover {
-    color: #ffcccc;
+  color: #ffcccc;
 }
 
 .shader-error-content {
-    font-family: monospace;
-    padding: 12px 16px;
-    margin: 0;
-    font-size: 0.875rem;
-    white-space: pre-wrap;
-    overflow-y: auto;
-    max-height: 255px;
+  font-family: monospace;
+  padding: 12px 16px;
+  margin: 0;
+  font-size: 0.875rem;
+  white-space: pre-wrap;
+  overflow-y: auto;
+  max-height: 255px;
 }
 
 /* Estilizar el scrollbar */
 .shader-error-content::-webkit-scrollbar {
-    width: 8px;
+  width: 8px;
 }
 
 .shader-error-content::-webkit-scrollbar-track {
-    background: #3c1818;
+  background: #3c1818;
 }
 
 .shader-error-content::-webkit-scrollbar-thumb {
-    background-color: #ff6666;
-    border-radius: 4px;
+  background-color: #ff6666;
+  border-radius: 4px;
 }
 
 .shader-error-content::-webkit-scrollbar-thumb:hover {
-    background-color: #ff8080;
+  background-color: #ff8080;
+}
+
+.btn-danger {
+  background-color: #dc3545;
+  color: white;
+}
+
+.btn-danger:hover {
+  background-color: #c82333;
+}
+
+/* Asegurar que los botones y otros elementos no se cortan */
+.button-container {
+  flex-shrink: 0;
+  margin-top: auto;
+  padding-top: 16px;
+}
+
+/* Si hay otros elementos en el sidebar */
+.controls, .info-panel {
+  flex-shrink: 0;
+  margin-bottom: 16px;
 }
