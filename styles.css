@@ -383,21 +383,21 @@ select {
 
 .shader-error-drawer {
   position: absolute;
-  bottom: -300px;
+  bottom: 0;
   left: 0;
   right: 0;
   background-color: #2c1212;
   color: #ff9999;
   border-top: 2px solid #ff6666;
   max-height: 300px;
+  transform: translateY(100%);
   transition: transform 0.3s ease-in-out;
   z-index: 1000;
   box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.3);
-  pointer-events: auto;
 }
 
 .shader-error-drawer.visible {
-  transform: translateY(-300px);
+  transform: translateY(0);
 }
 
 .shader-error-header {

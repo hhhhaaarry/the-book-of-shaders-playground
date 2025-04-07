@@ -15,11 +15,9 @@ class ShaderPlayground {
             u_mouse: { value: new THREE.Vector2() }
         };
         
-        // Inicializar referencias al error drawer
         this.errorDrawer = document.getElementById('shader-error');
         this.errorContent = this.errorDrawer?.querySelector('.shader-error-content');
         
-        // Configurar el renderer primero
         const container = document.getElementById('shader-preview');
         if (!container) {
             throw new Error('No se encontró el contenedor del preview');
@@ -27,16 +25,12 @@ class ShaderPlayground {
         container.appendChild(this.renderer.domElement);
         this.renderer.setPixelRatio(window.devicePixelRatio);
 
-        // Configurar la cámara
         this.camera.position.z = 1;
-
-        // Inicializar
         this.initShaders();
     }
 
     async initShaders() {
         try {
-            // Cargar los shaders por defecto
             const [vertexResponse, fragmentResponse] = await Promise.all([
                 fetch('/src/shaders/default.vertex.glsl'),
                 fetch('/src/shaders/default.fragment.glsl')
@@ -45,23 +39,19 @@ class ShaderPlayground {
             const defaultVertexShader = await vertexResponse.text();
             const defaultFragmentShader = await fragmentResponse.text();
 
-            // Crear el material con los shaders cargados
             const material = new THREE.ShaderMaterial({
                 uniforms: this.uniforms,
                 vertexShader: defaultVertexShader,
                 fragmentShader: defaultFragmentShader
             });
 
-            // Configurar la geometría y la malla
             const geometry = new THREE.PlaneGeometry(2, 2);
             this.mesh = new THREE.Mesh(geometry, material);
             this.scene.add(this.mesh);
 
-            // Configurar eventos y comenzar la animación
             this.setupEventListeners();
-            this.onResize(); // Llamar una vez para configurar el tamaño inicial
+            this.onResize();
             this.animate();
-
         } catch (error) {
             console.error('Error cargando shaders por defecto:', error);
         }
@@ -69,13 +59,10 @@ class ShaderPlayground {
 
     setupEventListeners() {
         window.addEventListener('resize', this.onResize.bind(this));
-        
         const container = this.renderer.domElement;
         container.addEventListener('mousemove', this.onMouseMove.bind(this));
-        
         document.addEventListener('shaderChange', this.onShaderChange.bind(this));
         
-        // Listener para el botón de reset de tiempo
         const resetTimeBtn = document.getElementById('reset-time');
         if (resetTimeBtn) {
             resetTimeBtn.addEventListener('click', () => {
@@ -84,25 +71,19 @@ class ShaderPlayground {
             });
         }
 
-        // Añadir evento para el botón de nuevo shader
-        document.getElementById('new-shader-btn').addEventListener('click', () => {
+        document.getElementById('new-shader-btn')?.addEventListener('click', () => {
             this.shaderLoader.createNewShader();
         });
 
-        // Añadir evento para el botón de duplicar shader
-        document.getElementById('duplicate-shader-btn').addEventListener('click', () => {
+        document.getElementById('duplicate-shader-btn')?.addEventListener('click', () => {
             this.shaderLoader.duplicateCurrentShader();
         });
 
-        // Configurar el botón de cerrar del error drawer
         const closeButton = this.errorDrawer?.querySelector('.error-close');
         if (closeButton) {
-            closeButton.addEventListener('click', () => {
-                this.hideErrorDrawer();
-            });
+            closeButton.addEventListener('click', () => this.hideErrorDrawer());
         }
 
-        // Configurar el resize handle
         const resizeHandle = document.querySelector('.resize-handle');
         const sidebar = document.querySelector('.sidebar');
         
@@ -120,11 +101,8 @@ class ShaderPlayground {
 
             document.addEventListener('mousemove', (e) => {
                 if (!isResizing) return;
-                
                 const width = startWidth + (e.pageX - startX);
                 sidebar.style.width = `${width}px`;
-                
-                // Forzar actualización del renderer
                 this.onResize();
             });
 
@@ -145,7 +123,6 @@ class ShaderPlayground {
         this.renderer.setSize(width, height);
         this.uniforms.u_resolution.value.set(width, height);
 
-        // Actualizar el span de resolución
         const resolutionSpan = document.getElementById('resolution');
         if (resolutionSpan) {
             resolutionSpan.textContent = `${width} x ${height}`;
@@ -159,7 +136,6 @@ class ShaderPlayground {
         
         this.uniforms.u_mouse.value.set(x, y);
 
-        // Actualizar el span de posición del mouse
         const mouseSpan = document.getElementById('mouse-position');
         if (mouseSpan) {
             mouseSpan.textContent = `x: ${x.toFixed(2)}, y: ${y.toFixed(2)}`;
@@ -167,65 +143,91 @@ class ShaderPlayground {
     }
 
     showErrorDrawer(errorMessage) {
-        console.log('showErrorDrawer llamado con mensaje:', errorMessage);
         if (this.errorDrawer && this.errorContent) {
-            console.log('Estado inicial del drawer:', {
-                hasVisibleClass: this.errorDrawer.classList.contains('visible'),
-                content: this.errorContent.textContent
-            });
             this.errorContent.textContent = errorMessage;
             this.errorDrawer.classList.add('visible');
-            console.log('Clase visible añadida al drawer');
         }
     }
 
     hideErrorDrawer() {
-        console.log('hideErrorDrawer llamado');
         if (this.errorDrawer) {
-            console.log('Estado antes de ocultar:', {
-                hasVisibleClass: this.errorDrawer.classList.contains('visible')
-            });
             this.errorDrawer.classList.remove('visible');
-            console.log('Clase visible eliminada del drawer');
         }
     }
 
     onShaderChange(event) {
-        const { vertex, fragment } = event.detail;
-        this.updateMaterial(vertex, fragment);
+        const shaderCode = event instanceof CustomEvent ? event.detail : event;
+        if (typeof shaderCode === 'object' && shaderCode.fragment && shaderCode.vertex) {
+            this.updateMaterial({
+                fragmentShader: shaderCode.fragment,
+                vertexShader: shaderCode.vertex
+            });
+        } else {
+            console.error('Formato de shader inválido:', shaderCode);
+        }
     }
 
-    updateMaterial(vertexShader, fragmentShader) {
-        try {
-            if (this.mesh && this.mesh.material) {
-                if (this.mesh.material.program) {
-                    const gl = this.renderer.getContext();
-                    gl.deleteProgram(this.mesh.material.program.program);
-                }
+    updateMaterial(shaderCode) {
+        if (!this.mesh || !this.mesh.material) return;
 
-                this.mesh.material.dispose();
+        const originalConsoleError = console.error;
+        let shaderError = null;
 
-                const newMaterial = new THREE.ShaderMaterial({
-                    uniforms: this.uniforms,
-                    vertexShader,
-                    fragmentShader
-                });
-
-                this.mesh.material = newMaterial;
+        console.error = function(...args) {
+            const errorMessage = args.join(' ');
+            if (errorMessage.includes('THREE.WebGLProgram: Shader Error')) {
+                shaderError = errorMessage;
             }
+            originalConsoleError.apply(console, args);
+        };
+
+        try {
+            if (this.mesh.material.program) {
+                const gl = this.renderer.getContext();
+                gl.deleteProgram(this.mesh.material.program.program);
+            }
+
+            this.mesh.material.dispose();
+            
+            const material = new THREE.ShaderMaterial({
+                uniforms: this.uniforms,
+                vertexShader: shaderCode.vertexShader,
+                fragmentShader: shaderCode.fragmentShader
+            });
+
+            this.mesh.material = material;
+            this.renderer.render(this.scene, this.camera);
+            
+            this.hideErrorDrawer();
         } catch (error) {
-            console.error('Error actualizando material:', error);
-            this.showErrorDrawer(error.message);
+            console.error('Error al actualizar el material:', error);
+            this.showErrorDrawer(`Error: ${error.message}`);
+        } finally {
+            console.error = originalConsoleError;
+            
+            if (shaderError) {
+                const errorLines = shaderError
+                    .split('\n')
+                    .filter(line => line.includes('ERROR:'))
+                    .map(line => {
+                        const match = line.match(/ERROR: \d+:(\d+): (.+)/);
+                        return match ? `Línea ${match[1]}: ${match[2]}` : line.trim();
+                    })
+                    .filter(Boolean);
+
+                if (errorLines.length > 0) {
+                    this.showErrorDrawer(errorLines.join('\n'));
+                }
+            }
         }
     }
 
     animate() {
-        requestAnimationFrame(this.animate.bind(this));
+        requestAnimationFrame(() => this.animate());
         
         if (this.uniforms.u_time) {
             this.uniforms.u_time.value = this.clock.getElapsedTime();
             
-            // Actualizar el span de tiempo
             const timeSpan = document.getElementById('time');
             if (timeSpan) {
                 timeSpan.textContent = this.uniforms.u_time.value.toFixed(2);
@@ -241,4 +243,6 @@ class ShaderPlayground {
 // Inicializar cuando el DOM esté listo
 document.addEventListener('DOMContentLoaded', () => {
     new ShaderPlayground();
-}); 
+});
+
+export default ShaderPlayground; 
