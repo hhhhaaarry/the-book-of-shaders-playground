@@ -9,6 +9,8 @@ uniform vec2 u_resolution;
 uniform vec2 u_mouse;
 uniform float u_time;
 
+varying vec2 vUv;
+
 float drawFilledSquare(float b, float l, float t, float r, vec2 st){
     vec2 bl;
     bl.x = floor(st.x + 1.0-l);

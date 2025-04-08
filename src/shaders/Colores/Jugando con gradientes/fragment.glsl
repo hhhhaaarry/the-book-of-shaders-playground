@@ -8,6 +8,8 @@ uniform vec2 u_resolution;
 uniform vec2 u_mouse;
 uniform float u_time;
 
+varying vec2 vUv;
+
 vec3 colorA = vec3(0.149,0.141,0.912);
 vec3 colorB = vec3(1.000,0.833,0.224);
 

@@ -5,6 +5,8 @@ precision mediump float;
 uniform vec2 u_resolution;
 uniform float u_time;
 
+varying vec2 vUv;
+
 vec3 rgb2hsb( in vec3 c ){
     vec4 K = vec4(0.0, -1.0 / 3.0, 2.0 / 3.0, -1.0);
     vec4 p = mix(vec4(c.bg, K.wz),
@@ -32,7 +34,7 @@ vec3 hsb2rgb( in vec3 c ){
 }
 
 void main(){
-    vec2 st = gl_FragCoord.xy/u_resolution;
+   vec2 st = vUv;
     vec3 color = vec3(0.0);
 
     // We map x (0.0 - 1.0) to the hue (0.0 - 1.0)

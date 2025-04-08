@@ -7,6 +7,8 @@ precision mediump float;
 uniform vec2 u_resolution;
 uniform float u_time;
 
+varying vec2 vUv;
+
 //  Function from Iñigo Quiles
 //  https://www.shadertoy.com/view/MsS3Wc
 vec3 hsb2rgb( in vec3 c ){
@@ -19,7 +21,7 @@ vec3 hsb2rgb( in vec3 c ){
 }
 
 void main(){
-    vec2 st = gl_FragCoord.xy/u_resolution;
+   vec2 st = vUv;
     vec3 color = vec3(0.0);
 
     // Use polar coordinates instead of cartesian

@@ -3,10 +3,17 @@ precision mediump float;
 #endif
 
 uniform vec2 u_resolution;
-uniform vec2 u_mouse;
+uniform vec2 u_mouse;  // Ahora en rango -1 a 1
 uniform float u_time;
+varying vec2 vUv;
 
 void main() {
+    // Para usar u_mouse con coordenadas UV (0 a 1), convertimos de vuelta:
+    vec2 mouse_uv = (u_mouse + 1.0) * 0.5;
+    
+    // Ahora podemos usar mouse_uv para comparar con vUv
+    float mouseDist = distance(vUv, mouse_uv);
+    
     // Normalizar las coordenadas del fragmento
     vec2 uv = gl_FragCoord.xy/u_resolution.xy;
     
@@ -15,7 +22,6 @@ void main() {
     wave *= sin(uv.y * 10.0 + u_time * 0.5) * 0.5 + 0.5;
     
     // Añadir interacción con el mouse
-    float mouseDist = distance(uv, u_mouse);
     float mouseInfluence = smoothstep(0.3, 0.0, mouseDist);
     
     // Mezclar el patrón con la influencia del mouse

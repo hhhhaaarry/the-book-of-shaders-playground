@@ -7,13 +7,15 @@ precision mediump float;
 uniform vec2 u_resolution;
 uniform float u_time;
 
+varying vec2 vUv;
+
 float plot(vec2 st, float pct){
   return  smoothstep( pct-0.02, pct, st.y) -
           smoothstep( pct, pct+0.02, st.y);
 }
 
 void main() {
-    vec2 st = gl_FragCoord.xy/u_resolution;
+   vec2 st = vUv;
 
     // Step will return 0.0 unless the value is over 0.5,
     // in that case it will return 1.0

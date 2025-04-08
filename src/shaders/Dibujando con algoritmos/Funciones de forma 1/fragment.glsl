@@ -6,6 +6,8 @@ uniform vec2 u_resolution;
 uniform vec2 u_mouse;
 uniform float u_time;
 
+varying vec2 vUv;
+
 // Plot a line on Y using a value between 0.0-1.0
 float plot(vec2 st) {    
     return smoothstep(0.02, 0.0, abs(st.y - st.x));

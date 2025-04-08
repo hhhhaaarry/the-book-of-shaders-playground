@@ -6,6 +6,8 @@ uniform vec2 u_resolution;
 uniform vec2 u_mouse;
 uniform float u_time;
 
+varying vec2 vUv;
+
 void main() {
     // Normalizar las coordenadas del fragmento
     vec2 uv = gl_FragCoord.xy/u_resolution.xy;

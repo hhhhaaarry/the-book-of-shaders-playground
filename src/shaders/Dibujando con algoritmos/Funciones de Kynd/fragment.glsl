@@ -8,6 +8,8 @@ uniform vec2 u_resolution;
 uniform vec2 u_mouse;
 uniform float u_time;
 
+varying vec2 vUv;
+
 float plot(vec2 st, float pct){
   return  smoothstep( pct-0.02, pct, st.y) -
           smoothstep( pct, pct+0.02, st.y);
@@ -28,7 +30,7 @@ float kynd5(vec2 st, float pct){
   return 1.0-pow(max(0.0, abs(st.x)*2.0-1.0), pct);
 }
 void main() {
-    vec2 st = gl_FragCoord.xy/u_resolution;
+   vec2 st = vUv;
     float y = 0.;
   
     // Uncomment to change between different form functions
