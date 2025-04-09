@@ -1,14 +1,14 @@
 :root {
-  --accent-color: #49276a;
-  --secondary-color: #734de5;
+  --accent-color: oklch(62.3% 0.214 259.815);
+  --secondary-color: oklch(48.8% 0.243 264.376);
 }
 
 body {
   margin: 0;
   height: 100vh;
   overflow: hidden;
-  background: #1a1a1a;
-  color: #fff;
+  background: oklch(21.6% 0.006 56.043);
+  color: oklch(97% 0.001 106.424);
   font-family: monospace;
   box-sizing: border-box;
 }
@@ -29,30 +29,34 @@ body {
   width: 500px;
   min-width: 200px;
   max-width: 1920px;
-  background: rgba(0, 0, 0, 0.8);
+  background: oklch(21.6% 0.006 56.043);
   resize: horizontal;
 }
 
 .resize-handle {
   width: 4px;
-  background: #333;
+  background: oklch(26.8% 0.007 34.298);
   cursor: col-resize;
   transition: background 0.2s;
 }
 
 .resize-handle:hover,
 .resize-handle.active {
-  background: #555;
+  background: oklch(37.4% 0.01 67.558);
 }
 
 select {
-  background: #333;
-  color: #fff;
-  border: 1px solid #555;
+  background: oklch(26.8% 0.007 34.298);
+  color: oklch(97% 0.001 106.424);
+  border: 1px solid oklch(21.6% 0.006 56.043);
   padding: 5px;
   width: 100%;
   border-radius: 4px;
-  height: 36px;
+  height: 40px;
+  font-size: 14px;
+}
+select:hover {
+  background: oklch(37.4% 0.01 67.558); 
 }
 
 #shader-editor {
@@ -87,7 +91,7 @@ select {
 
 .tab-button {
   background: #222;
-  color: #555;
+  color: oklch(37.4% 0.01 67.558);
   border: none;
   cursor: pointer;
   height: 21px;
@@ -156,7 +160,7 @@ select {
 /* Estilos para uniforms */
 .uniforms {
   margin-top: 16px;
-  border-top: 1px solid #555;
+  border-top: 1px solid oklch(37.4% 0.01 67.558);
   padding-top: 16px;
 }
 
@@ -177,7 +181,7 @@ select {
 
 .uniform-button {
   background: #444;
-  color: #fff;
+  color: oklch(97% 0.001 106.424);
   border: none;
   padding: 2px 8px;
   border-radius: 3px;
@@ -187,45 +191,53 @@ select {
 }
 
 .uniform-button:hover {
-  background: #555;
+  background: oklch(37.4% 0.01 67.558);
 }
 
 .btn {
-  background-color: var(--accent-color);
+  background-color: oklch(21.6% 0.006 56.043);
   border: none;
-  color: white;
+  color:var(--accent-color);
+  border:solid 2px var(--secondary-color);
   padding: 8px 16px;
-  height: 36px;
+  height: 40px;
   text-align: center;
   text-decoration: none;
   display: inline-block;
   font-size: 14px;
   cursor: pointer;
-  border-radius: 4px;
+  border-radius: 6px;
   transition: background-color 0.3s;
   width: 100%;
+  -webkit-border-radius: 6px;
+  -moz-border-radius: 6px;
+  -ms-border-radius: 6px;
+  -o-border-radius: 6px;
 }
 
 .btn:hover {
-  background-color: var(--accent-color);
+  background-color: oklch(21.6% 0.006 56.043);
 }
 
 .btn:disabled {
-  background-color: #cccccc;
+  background-color: oklch(26.8% 0.007 34.298);
   cursor: not-allowed;
   opacity: 0.7;
 }
 
 .btn-primary {
   background-color: var(--secondary-color);
+  color: oklch(21.6% 0.006 56.043);
+  border-width: 0px;
 }
 
 .btn-primary:hover {
-  background-color: var(--secondary-color);
+  background-color: var(--accent-color);
 }
 
 .btn-primary:disabled {
-  background-color: #6c757d;
+  background-color: oklch(37.4% 0.01 67.558);
+  color: oklch(21.6% 0.006 56.043);
 }
 
 .selectors {
@@ -256,11 +268,11 @@ select {
 }
 
 .btn-success {
-  background-color: var(--accent-color);
+  background-color: oklch(21.6% 0.006 56.043);
 }
 
 .btn-success:hover {
-  background-color: darken(var(--accent-color), 10%);
+  background-color: oklch(26.8% 0.007 34.298);
 }
 
 .btn-secondary {
@@ -302,7 +314,7 @@ select {
 .modal h2 {
   margin-top: 0;
   margin-bottom: 24px;
-  color: #fff;
+  color: oklch(97% 0.001 106.424);
 }
 
 .modal-form {
@@ -326,9 +338,9 @@ select {
 
 .form-group input[type="text"] {
   padding: 8px;
-  background: #333;
-  border: 1px solid #555;
-  color: #fff;
+  background: oklch(26.8% 0.007 34.298);
+  border: 1px solid oklch(37.4% 0.01 67.558);
+  color: oklch(97% 0.001 106.424);
   border-radius: 4px;
   margin-top: 5px;
 }
@@ -361,7 +373,7 @@ select {
 
 /* Skeleton loader */
 .skeleton {
-  background: linear-gradient(90deg, #2a2a2a 25%, #333 50%, #2a2a2a 75%);
+  background: linear-gradient(90deg, #2a2a2a 25%, oklch(26.8% 0.007 34.298) 50%, #2a2a2a 75%);
   background-size: 200% 100%;
   animation: loading 1.5s infinite;
   border-radius: 4px;
@@ -521,7 +533,7 @@ select {
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: #333;
+  background-color: oklch(26.8% 0.007 34.298);
   -webkit-transition: .4s;
   transition: .4s;
 }
