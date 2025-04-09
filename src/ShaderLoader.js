@@ -939,23 +939,20 @@ export class ShaderLoader {
 
     // Si no hay capítulo, limpiamos todos los parámetros
     if (!this.currentChapter) {
-      params.delete("chapter");
-      params.delete("exercise");
-    } else {
-      params.set("chapter", this.currentChapter);
-
-      // Si hay ejercicio lo añadimos, si no, lo eliminamos
-      if (this.currentExercise) {
-        params.set("exercise", this.currentExercise);
-      } else {
+        params.delete("chapter");
         params.delete("exercise");
-      }
+    } else {
+        // Sanitizar para la URL
+        params.set("chapter", this.sanitizeId(this.currentChapter));
+        
+        if (this.currentExercise) {
+            params.set("exercise", this.sanitizeId(this.currentExercise));
+        } else {
+            params.delete("exercise");
+        }
     }
 
-    // Actualizar la URL sin recargar la página
-    const newURL = `${window.location.pathname}${
-      params.toString() ? "?" + params.toString() : ""
-    }`;
+    const newURL = `${window.location.pathname}${params.toString() ? "?" + params.toString() : ""}`;
     window.history.pushState({}, "", newURL);
   }
 
@@ -1093,98 +1090,111 @@ export class ShaderLoader {
 
     let finalChapterId;
     let exerciseName;
+    let originalChapterName;
+    let originalExerciseName;
 
     // Determinar el capítulo
     if (chapterInput.value === "new") {
-      if (!newChapterInput.value.trim()) {
-        alert("Por favor, introduce un nombre para el nuevo capítulo");
-        return;
-      }
-      finalChapterId = this.sanitizeId(newChapterInput.value);
+        if (!newChapterInput.value.trim()) {
+            alert("Por favor, introduce un nombre para el nuevo capítulo");
+            return;
+        }
+        originalChapterName = newChapterInput.value.trim();
+        finalChapterId = originalChapterName; // Ya no sanitizamos el ID de la carpeta
     } else {
-      if (!chapterInput.value) {
-        alert("Por favor, selecciona un capítulo");
-        return;
-      }
-      finalChapterId = chapterInput.value;
+        if (!chapterInput.value) {
+            alert("Por favor, selecciona un capítulo");
+            return;
+        }
+        finalChapterId = chapterInput.value;
+        originalChapterName = finalChapterId;
     }
 
     // Obtener nombre del ejercicio
     if (!newExerciseInput.value.trim()) {
-      alert("Por favor, introduce un nombre para el ejercicio");
-      return;
+        alert("Por favor, introduce un nombre para el ejercicio");
+        return;
     }
-    exerciseName = this.sanitizeId(newExerciseInput.value);
+    originalExerciseName = newExerciseInput.value.trim();
+    exerciseName = originalExerciseName; // Ya no sanitizamos el nombre del ejercicio
 
     // Asegurarnos de que tenemos shaders válidos
-    const fragmentCode =
-      this.currentShaders.fragment || this.defaultShaders.fragment;
+    const fragmentCode = this.currentShaders.fragment || this.defaultShaders.fragment;
     const vertexCode = this.currentShaders.vertex || this.defaultShaders.vertex;
 
+    // Usar los nombres originales para las rutas de los archivos
     const fragmentPath = `/src/shaders/${finalChapterId}/${exerciseName}/fragment.glsl`;
     const vertexPath = `/src/shaders/${finalChapterId}/${exerciseName}/vertex.glsl`;
 
     try {
-      // Guardar ambos shaders
-      await Promise.all([
-        fetch("/api/save-shader", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            content: fragmentCode,
-            path: fragmentPath,
-            isNew: true,
-          }),
-        }),
-        fetch("/api/save-shader", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            content: vertexCode,
-            path: vertexPath,
-            isNew: true,
-          }),
-        }),
-      ]);
+        // Guardar ambos shaders
+        await Promise.all([
+            fetch("/api/save-shader", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    content: fragmentCode,
+                    path: fragmentPath,
+                    isNew: true,
+                    originalName: {
+                        chapter: originalChapterName,
+                        exercise: originalExerciseName
+                    }
+                }),
+            }),
+            fetch("/api/save-shader", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    content: vertexCode,
+                    path: vertexPath,
+                    isNew: true,
+                    originalName: {
+                        chapter: originalChapterName,
+                        exercise: originalExerciseName
+                    }
+                }),
+            }),
+        ]);
 
-      // Actualizar el estado
-      this.currentChapter = finalChapterId;
-      this.currentExercise = exerciseName;
+        // Actualizar el estado con los nombres originales
+        this.currentChapter = finalChapterId;
+        this.currentExercise = exerciseName;
 
-      // Asegurarnos de que los shaders actuales son válidos
-      this.currentShaders = {
-        vertex: vertexCode,
-        fragment: fragmentCode,
-      };
+        // Asegurarnos de que los shaders actuales son válidos
+        this.currentShaders = {
+            vertex: vertexCode,
+            fragment: fragmentCode,
+        };
 
-      // Recargar la estructura de shaders
-      await this.loadShaderStructure();
+        // Recargar la estructura de shaders
+        await this.loadShaderStructure();
 
-      // Cerrar el modal
-      this.hideModal();
+        // Cerrar el modal
+        this.hideModal();
 
-      // Actualizar el resto de la UI
-      this.hasChanges = false;
-      this.updateSaveButtonVisibility();
-      this.updateURLParams();
-      this.updateBreadcrumb();
+        // Actualizar el resto de la UI
+        this.hasChanges = false;
+        this.updateSaveButtonVisibility();
+        this.updateURLParams();
+        this.updateBreadcrumb();
 
-      // Disparar evento de cambio de shader
-      const event = new CustomEvent("shaderChange", {
-        detail: {
-          vertex: vertexCode,
-          fragment: fragmentCode,
-        },
-      });
-      document.dispatchEvent(event);
+        // Disparar evento de cambio de shader
+        const event = new CustomEvent("shaderChange", {
+            detail: {
+                vertex: vertexCode,
+                fragment: fragmentCode,
+            },
+        });
+        document.dispatchEvent(event);
 
-      alert("Shaders guardados correctamente");
+        alert("Shaders guardados correctamente");
     } catch (error) {
-      alert("Error al guardar los shaders: " + error.message);
+        alert("Error al guardar los shaders: " + error.message);
     }
   }
 
@@ -1383,26 +1393,43 @@ export class ShaderLoader {
     console.log("Inicializando desde URL:", { urlChapter, urlExercise });
 
     if (urlChapter) {
-      // Actualizar el select de capítulo
-      const chapterSelect = document.getElementById("chapter-select");
-      if (chapterSelect) {
-        chapterSelect.value = urlChapter;
-        this.currentChapter = urlChapter;
+        // Buscar el capítulo original que corresponde a la versión sanitizada de la URL
+        const chapterSelect = document.getElementById("chapter-select");
+        if (chapterSelect) {
+            // Encontrar el capítulo original comparando las versiones sanitizadas
+            const foundChapter = Array.from(this.chapters.entries()).find(([id, chapter]) => 
+                this.sanitizeId(id) === urlChapter
+            );
 
-        // Actualizar el select de ejercicios
-        await this.updateExerciseSelect();
+            if (foundChapter) {
+                const [originalChapterId] = foundChapter;
+                chapterSelect.value = originalChapterId;
+                this.currentChapter = originalChapterId;
 
-        if (urlExercise) {
-          const exerciseSelect = document.getElementById("exercise-select");
-          if (exerciseSelect) {
-            exerciseSelect.value = urlExercise;
-            this.currentExercise = urlExercise;
+                // Actualizar el select de ejercicios
+                await this.updateExerciseSelect();
 
-            // Cargar el shader
-            await this.loadShader(urlChapter, urlExercise);
-          }
+                if (urlExercise) {
+                    const exerciseSelect = document.getElementById("exercise-select");
+                    if (exerciseSelect) {
+                        // Encontrar el ejercicio original comparando las versiones sanitizadas
+                        const chapterData = this.chapters.get(originalChapterId);
+                        const foundExercise = Object.entries(chapterData.exercises).find(([id, exercise]) => 
+                            this.sanitizeId(id) === urlExercise
+                        );
+
+                        if (foundExercise) {
+                            const [originalExerciseId] = foundExercise;
+                            exerciseSelect.value = originalExerciseId;
+                            this.currentExercise = originalExerciseId;
+
+                            // Cargar el shader con los nombres originales
+                            await this.loadShader(originalChapterId, originalExerciseId);
+                        }
+                    }
+                }
+            }
         }
-      }
     }
   }
 }

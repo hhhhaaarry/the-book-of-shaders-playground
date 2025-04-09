@@ -54,7 +54,7 @@ float drawStrokeSquare(float b, float l, float t, float r, vec2 st, float w){
 }
 
 void main(){
-    vec2 st = gl_FragCoord.xy/u_resolution.xy;
+    vec2 st = vUv;
     vec3 blue = vec3(0.,0.,1.0);
     vec3 yellow = vec3(1.,1.,0.);
     vec3 red = vec3(1.,0.,0.);
