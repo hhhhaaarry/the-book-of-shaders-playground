@@ -55,7 +55,8 @@ class ShaderPlayground {
         this.controls.screenSpacePanning = false;
         this.controls.minDistance = 1;
         this.controls.maxDistance = 5;
-        this.controls.maxPolarAngle = Math.PI / 2;
+        this.controls.maxPolarAngle = Math.PI;
+        this.controls.minPolarAngle = 0;
         this.controls.enabled = false;
 
         this.raycaster = new THREE.Raycaster();
@@ -122,10 +123,10 @@ class ShaderPlayground {
             const material = new THREE.ShaderMaterial({
                 uniforms: this.uniforms,
                 vertexShader: defaultVertexShader,
-                fragmentShader: defaultFragmentShader
+                fragmentShader: defaultFragmentShader,
             });
 
-            const geometry = new THREE.PlaneGeometry(2, 2, 128, 128);
+            const geometry = new THREE.PlaneGeometry(2, 2, 512, 512);
             this.mesh = new THREE.Mesh(geometry, material);
             this.scene.add(this.mesh);
 
@@ -380,7 +381,8 @@ class ShaderPlayground {
         this.controls.screenSpacePanning = false;
         this.controls.minDistance = 1;
         this.controls.maxDistance = 5;
-        this.controls.maxPolarAngle = Math.PI / 2;
+        this.controls.maxPolarAngle = Math.PI;
+        this.controls.minPolarAngle = 0;
         this.controls.enabled = false; // Desactivados por defecto
         
         // Guardar la posición inicial de la cámara perspectiva
