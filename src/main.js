@@ -125,7 +125,7 @@ class ShaderPlayground {
                 fragmentShader: defaultFragmentShader
             });
 
-            const geometry = new THREE.PlaneGeometry(2, 2);
+            const geometry = new THREE.PlaneGeometry(2, 2, 128, 128);
             this.mesh = new THREE.Mesh(geometry, material);
             this.scene.add(this.mesh);
 
